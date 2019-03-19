@@ -44,14 +44,13 @@ namespace UnitTestSnowflake
         }
         public long NextId()
         {
-            var currentTimeStamp = TimeStamp();
-            if (currentTimeStamp < lastTimestamp)
-            {
-                throw new Exception("时间戳生成出现错误");
-            }
-
             lock (locker)
             {
+               var currentTimeStamp = TimeStamp();
+                if (currentTimeStamp < lastTimestamp)
+                {
+                    throw new Exception("时间戳生成出现错误");
+                }
                 if (currentTimeStamp == lastTimestamp)
                 {
                     if (lastIndex < 4095)//为了保证长度
@@ -68,12 +67,13 @@ namespace UnitTestSnowflake
                     lastIndex = 0;
                     lastTimestamp = currentTimeStamp;
                 }
+                var timeStr = Convert.ToString(currentTimeStamp, 2);
+                var dcStr = Convert.ToString(dataCenterId, 2).PadLeft(5, '0');
+                var wStr = Convert.ToString(workId, 2).PadLeft(5, '0'); ;
+                var indexStr = Convert.ToString(lastIndex, 2).PadLeft(12, '0');
+                return Convert.ToInt64($"0{timeStr}{dcStr}{wStr}{indexStr}", 2);
             }
-            var timeStr = Convert.ToString(currentTimeStamp, 2);
-            var dcStr = Convert.ToString(dataCenterId, 2).PadLeft(5, '0');
-            var wStr = Convert.ToString(workId, 2).PadLeft(5, '0'); ;
-            var indexStr = Convert.ToString(lastIndex, 2).PadLeft(12, '0');
-            return Convert.ToInt64($"0{timeStr}{dcStr}{wStr}{indexStr}", 2);
+
         }
         public long TimeStamp()
         {
